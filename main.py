@@ -101,12 +101,12 @@ def get_train_test(df, y_col, x_cols, ratio):
 	return df_train, df_test, X_train, Y_train, X_test, Y_test
 
 
-filename = 'D:/pycharm/pythonProject/ECGclassify/ECGData/ECGData.mat'
+filename = 'D:/pycharm/pythonProject/ECGclassify/ECGData/data.mat'
 ecg_data = sio.loadmat(filename)
-ecg_signals = ecg_data['ECGData'][0][0][0]
-ecg_labels_ = ecg_data['ECGData'][0][0][1]
-
-ecg_labels = list(map(lambda x: x[0][0], ecg_labels_))# 取出标签ndarray的X[0][0],构成一个标签列表，成为真正的标签
+ecg_signals = ecg_data['data'][0][0][0]
+ecg_labels_ = ecg_data['data'][0][0][1]
+ecg_labels = ecg_labels_
+# ecg_labels = list(map(lambda x: x[0][0], ecg_labels_))# 取出标签ndarray的X[0][0],构成一个标签列表，成为真正的标签
 # 读取出ecg信号的数据和标签 使用defaultdict构建一个默认value为list的字典
 dict_ecg_data = defaultdict(list)
 #enumerate 将一个可遍历的数据对象(如列表、元组或字符串)组合为一个索引序列，同时列出数据和数据下标，这里为(0，ARR),(1,ARR)等，通过这种方法将标签和数据结合起来构成字典。

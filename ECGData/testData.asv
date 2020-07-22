@@ -1,2 +1,0 @@
-load('ECGData.mat')
-Data = [data;lable];
