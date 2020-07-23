@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # _*_ coding:utf-8 _*_
 # @ProjectName :ECGclassify
-# @FileName    :test.py
-# @Time        :2020/7/20  16:43
+# @FileName    :verson1.py
+# @Time        :2020/7/23  13:21
 # @Author      :Shuhao Chen
 import os
 import time
@@ -54,11 +54,10 @@ def calculate_statistics(list_values):
 	diff2_mean = np.nanmean(diff2)
 	diff2_median = np.nanpercentile(diff2, 50)
 	diff2_std = np.nanstd(diff2)
-	# return [n5, n25, n75, n95, median, mean, std, var, rms,diff1_mean,diff1_median,diff1_std,diff2_mean,diff2_median,diff2_std]
-	# return [n5, n25, n75, n95, median, mean, std, var, rms]
 	min_ratio = min(list_values)/len(list_values)
 	max_ratio = max(list_values)/len(list_values)
 	return [n5, n25, n75, n95, median, mean, std, var, rms,diff1_mean,diff1_median,diff1_std,diff2_mean,diff2_median,diff2_std,min_ratio,max_ratio]
+	# return [n5, n25, n75, n95, median, mean, std, var, rms]
 # 过零率，即信号穿过0的次数
 # 平均穿越率，即信号穿越平均值y的次数
 def calculate_crossings(list_values):
@@ -114,8 +113,8 @@ def get_train_test(df, y_col, x_cols, ratio):
 
 filename = 'D:/pycharm/pythonProject/ECGclassify/ECGData/data1.mat'
 ecg_data = sio.loadmat(filename)
-ecg_signals = ecg_data['data1'][0][0][0]
-ecg_labels_ = ecg_data['data1'][0][0][1]
+ecg_signals = ecg_data['data'][0][0][0]
+ecg_labels_ = ecg_data['data'][0][0][1]
 ecg_labels = ecg_labels_
 # ecg_labels = list(map(lambda x: x[0][0], ecg_labels_))# 取出标签ndarray的X[0][0],构成一个标签列表，成为真正的标签
 # 读取出ecg信号的数据和标签 使用defaultdict构建一个默认value为list的字典
@@ -132,81 +131,24 @@ for signal in ecg_signals:
     list_features.append(features)
 df = pd.DataFrame(list_features) #将所有信号构成的特征向量列表变成dataframe表格形式
 
-
-
-# 特征选择
-
-fs = FeatureSelector(data =df, labels = list_labels)
-fs.identify_missing(missing_threshold=0.2)
-missing_features = fs.ops['missing']
-print(missing_features[:10])
-
-fs.identify_single_unique()
-single_unique = fs.ops['single_unique']
-print(single_unique)
-fs.plot_unique()
-
-fs.identify_collinear(correlation_threshold=0.975)
-correlated_features = fs.ops['collinear']
-print(correlated_features[:5])
-fs.plot_collinear()
-
-
-# fs.identify_zero_importance(task = 'classification', eval_metric = 'auc',
-#                             n_iterations = 10, early_stopping = True)
-
-# one_hot_features = fs.one_hot_features
-# base_features = fs.base_features
-# print('There are %d original features' % len(base_features))
-# print('There are %d one-hot features' % len(one_hot_features))
-# fs.data_all.head(10)
-# zero_importance_features = fs.ops['zero_importance']
-# zero_importance_features[10:15]
-# fs.plot_feature_importances(threshold = 0.99, plot_n = 12)
-# fs.feature_importances.head(10)
-# one_hundred_features = list(fs.feature_importances.loc[:99, 'feature'])
-# print(len(one_hundred_features))
-
-# fs = FeatureSelector(data = train_df, labels = label_df)
-#
-# fs.identify_all(selection_params = {'missing_threshold': 0.6, 'correlation_threshold': 0.98,
-#                                     'task': 'classification', 'eval_metric': 'auc',
-#                                      'cumulative_importance': 0.99})
-train_removed_all = fs.remove(methods = ['missing', 'single_unique','collinear'])
-tr = train_removed_all.values
-print('Original Number of Features', df.shape[1])
-print('Final Number of Features: ', train_removed_all.shape[1])
-# train_removed_all = pd.DataFrame(train_removed_all,columns = list(range(train_removed_all.shape[1])))
-tr = train_removed_all.values
-train_removed_all = pd.DataFrame(tr)
 ycol = 'y'
-xcols = list(range(train_removed_all.shape[1])) # 获取特征数量，这里是168个特征
-train_removed_all.loc[:,ycol] = list_labels # 在dataframe的最后一列加上一个标签y，并将标签列表放到其中，这样特征向量和标签就对应起来并都在一个df中了
-df0 = train_removed_all.loc[train_removed_all['y'].isin(['0'])] #取出高兴，悲伤，愤怒，恐惧数据
-df1 = train_removed_all.loc[train_removed_all['y'].isin(['1'])]
-df2 = train_removed_all.loc[train_removed_all['y'].isin(['2'])]
-df3 = train_removed_all.loc[train_removed_all['y'].isin(['3'])]
-frames = [df0, df3]
+xcols = list(range(df.shape[1])) # 获取特征数量，这里是168个特征
+df.loc[:,ycol] = list_labels # 在dataframe的最后一列加上一个标签y，并将标签列表放到其中，这样特征向量和标签就对应起来并都在一个df中了
+df0 = df.loc[df['y'].isin(['0'])] #取出高兴，悲伤，愤怒，恐惧数据
+df1 = df.loc[df['y'].isin(['1'])]
+df2 = df.loc[df['y'].isin(['2'])]
+df3 = df.loc[df['y'].isin(['3'])]
+frames = [df0, df1,df2,df3]
 
 df_result= pd.concat(frames)
-
 df_train, df_test, X_train, Y_train, X_test, Y_test = get_train_test(df_result, ycol, xcols, ratio = 0.7)
-cls = GradientBoostingClassifier(n_estimators=10,random_state=10)
+
+cls = GradientBoostingClassifier(n_estimators=7,random_state=10)
 cls.fit(X_train, Y_train) # 训练模型
 train_score = cls.score(X_train, Y_train) #训练集得分
 test_score = cls.score(X_test, Y_test) # 测试集得分
 print("The Train Score is {:.5f}".format(train_score)) #数字格式化
 print("The Test Score is {:.5f}".format(test_score))
 print(Y_test)
-
 Y_predict=cls.predict(X_test)
 print(Y_predict)
-
-#
-# #3.训练svm分类器
-#
-# classifier=svm.SVC(C=2,kernel='rbf',gamma=10,decision_function_shape='ovr') # ovr:一对多策略
-# classifier.fit(X_train,Y_train.ravel()) #ravel函数在降维时默认是行序优先
-#
-# print("训练集：",classifier.score(X_train, Y_train))
-# print("测试集：",classifier.score(X_test, Y_test))
