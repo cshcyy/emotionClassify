@@ -66,14 +66,14 @@ def calculate_crossings(list_values):
 	no_zero_crossings = len(zero_crossing_indices)
 	mean_crossing_indices = np.nonzero(np.diff(np.array(list_values) > np.nanmean(list_values)))[0]
 	no_mean_crossings = len(mean_crossing_indices)
-	return [no_zero_crossings, no_mean_crossings]
+	return [no_mean_crossings]
 
 
 def get_features(list_values):
 	entropy = calculate_entropy(list_values)
 	crossings = calculate_crossings(list_values)
 	statistics = calculate_statistics(list_values)
-	return [entropy] + crossings + statistics
+	return  crossings + statistics
 	#return [entropy] + statistics
 
 def get_uci_har_features(dataset, labels, waveletname):
@@ -154,7 +154,7 @@ fs.plot_collinear()
 
 # fs.identify_zero_importance(task = 'classification', eval_metric = 'auc',
 #                             n_iterations = 10, early_stopping = True)
-
+#
 # one_hot_features = fs.one_hot_features
 # base_features = fs.base_features
 # print('There are %d original features' % len(base_features))

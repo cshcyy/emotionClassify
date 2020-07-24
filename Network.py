@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # _*_ coding:utf-8 _*_
 # @ProjectName :ECGclassify
-# @FileName    :verson2.py
-# @Time        :2020/7/23  14:30
+# @FileName    :Network.py
+# @Time        :2020/7/24  14:42
 # @Author      :Shuhao Chen
 import os
 import time
@@ -17,9 +17,11 @@ import scipy.stats
 from feature_selector import FeatureSelector
 import datetime as dt
 from collections import defaultdict, Counter
-
+from sklearn.model_selection import train_test_split
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.utils import shuffle
+from sklearn.utils import shuffle, column_or_1d
+
+
 # 计算特征的函数集合
 # 计算熵值
 def calculate_entropy(list_values):
@@ -27,6 +29,7 @@ def calculate_entropy(list_values):
 	probabilities = [elem[1] / len(list_values) for elem in counter_values]
 	entropy = scipy.stats.entropy(probabilities)
 	return entropy
+
 
 # 计算各种统计特征
 # 方差
@@ -54,10 +57,13 @@ def calculate_statistics(list_values):
 	diff2_mean = np.nanmean(diff2)
 	diff2_median = np.nanpercentile(diff2, 50)
 	diff2_std = np.nanstd(diff2)
-	min_ratio = min(list_values)/len(list_values)
-	max_ratio = max(list_values)/len(list_values)
-	return [n5, n25, n75, n95, median, mean, std, var, rms,diff1_mean,diff1_median,diff1_std,diff2_mean,diff2_median,diff2_std,min_ratio,max_ratio]
-	# return [n5, n25, n75, n95, median, mean, std, var, rms]
+	min_ratio = min(list_values) / len(list_values)
+	max_ratio = max(list_values) / len(list_values)
+	return [n5, n25, n75, n95, median, mean, std, var, rms, diff1_mean, diff1_median, diff1_std, diff2_mean,
+			diff2_median, diff2_std, min_ratio, max_ratio]
+
+
+# return [n5, n25, n75, n95, median, mean, std, var, rms]
 # 过零率，即信号穿过0的次数
 # 平均穿越率，即信号穿越平均值y的次数
 def calculate_crossings(list_values):
@@ -73,7 +79,9 @@ def get_features(list_values):
 	crossings = calculate_crossings(list_values)
 	statistics = calculate_statistics(list_values)
 	return [entropy] + crossings + statistics
-	#return [entropy] + statistics
+
+
+# return [entropy] + statistics
 
 def get_uci_har_features(dataset, labels, waveletname):
 	uci_har_features = []
@@ -102,8 +110,8 @@ def get_train_test(df, y_col, x_cols, ratio):
 	# df = df.sample(frac=1.0)
 	# 打乱所有数据
 	df = shuffle(df)
-	df_train = df.iloc[:int(len(df)*ratio)]
-	df_test = df.iloc[int(len(df)*ratio):]
+	df_train = df.iloc[:int(len(df) * ratio)]
+	df_test = df.iloc[int(len(df) * ratio):]
 	Y_train = df_train[y_col].values
 	Y_test = df_test[y_col].values
 	X_train = df_train[x_cols].values
@@ -124,37 +132,48 @@ list_labels = ecg_labels
 list_features = []
 
 for signal in ecg_signals:
-    features = []
-    # list_coeff = pywt.wavedec(signal, 'db4')  #对信号进行小波变换，分成n个子带，这个n的大小由数据长度决定
-    # for coeff in list_coeff:  # 对分成的每一个子带进行特征值的计算上述12个特征，在这个例子中，信号被分成了14个子带，所以一个信号最后得到12*14 = 168个特征，组成了这个信号的特征向量。
-    features += get_features(signal)
-    list_features.append(features)
-df = pd.DataFrame(list_features) #将所有信号构成的特征向量列表变成dataframe表格形式
+	features = []
+	# list_coeff = pywt.wavedec(signal, 'db4')  #对信号进行小波变换，分成n个子带，这个n的大小由数据长度决定
+	# for coeff in list_coeff:  # 对分成的每一个子带进行特征值的计算上述12个特征，在这个例子中，信号被分成了14个子带，所以一个信号最后得到12*14 = 168个特征，组成了这个信号的特征向量。
+	features += get_features(signal)
+	list_features.append(features)
+df = pd.DataFrame(list_features)  # 将所有信号构成的特征向量列表变成dataframe表格形式
 
 ycol = 'y'
-xcols = list(range(df.shape[1])) # 获取特征数量，这里是168个特征
-df.loc[:,ycol] = list_labels # 在dataframe的最后一列加上一个标签y，并将标签列表放到其中，这样特征向量和标签就对应起来并都在一个df中了
-df_save = df.values
-filename1 = 'D:/pycharm/pythonProject/ECGclassify/ECGData/feature.mat'
-sio.savemat(filename1,{'featureAndLabel':df.values})
-df0 = df.loc[df['y'].isin(['0'])] #取出高兴，悲伤，愤怒，恐惧数据
-df1 = df.loc[df['y'].isin(['1'])]
-df2 = df.loc[df['y'].isin(['2'])]
-df3 = df.loc[df['y'].isin(['3'])]
-frames = [df3,df1]
+xcols = list(range(df.shape[1]))  # 获取特征数量，这里是168个特征
+# df.loc[:,ycol] = list_labels # 在dataframe的最后一列加上一个标签y，并将标签列表放到其中，这样特征向量和标签就对应起来并都在一个df中了
+# df0 = df.loc[df['y'].isin(['0'])] #取出高兴，悲伤，愤怒，恐惧数据
+# df1 = df.loc[df['y'].isin(['1'])]
+# df2 = df.loc[df['y'].isin(['2'])]
+# df3 = df.loc[df['y'].isin(['3'])]
+# frames = [df3,df1]
+#
+# df_result= pd.concat(frames)
+# df_train, df_test, X_train, Y_train, X_test, Y_test = get_train_test(df_result, ycol, xcols, ratio = 0.7)
+X_train,X_test, Y_train,  Y_test = train_test_split(df, list_labels, test_size=0.3, random_state=0,
+													stratify=list_labels)
+Y_train = Y_train.ravel()
+Y_test = Y_test.ravel()
+print(X_train.shape)
+print(Y_train.shape)
 
-df_result= pd.concat(frames)
-df_train, df_test, X_train, Y_train, X_test, Y_test = get_train_test(df_result, ycol, xcols, ratio = 0.7)
-
-# cls = GradientBoostingClassifier(n_estimators=15,random_state=10)
-# cls.fit(X_train, Y_train) # 训练模型
-# train_score = cls.score(X_train, Y_train) #训练集得分
-# test_score = cls.score(X_test, Y_test) # 测试集得分
-# print("The Train Score is {:.5f}".format(train_score)) #数字格式化
-# print("The Test Score is {:.5f}".format(test_score))
-# print(Y_test)
-# Y_predict=cls.predict(X_test)
-# print(Y_predict)
+# print((Y_train == 0).sum())
+# print((Y_test == 0).sum())
+# print((Y_train == 1).sum())
+# print((Y_test == 1).sum())
+# print((Y_train == 2).sum())
+# print((Y_test == 2).sum())
+# print((Y_train == 3).sum())
+# print((Y_test == 3).sum())
+cls = GradientBoostingClassifier(n_estimators=10,random_state=10)
+cls.fit(X_train, Y_train) # 训练模型
+train_score = cls.score(X_train, Y_train) #训练集得分
+test_score = cls.score(X_test, Y_test) # 测试集得分
+print("The Train Score is {:.5f}".format(train_score)) #数字格式化
+print("The Test Score is {:.5f}".format(test_score))
+print(Y_test)
+Y_predict=cls.predict(X_test)
+print(Y_predict)
 # # #3.训练svm分类器
 # #
 # classifier=svm.SVC(C=2,kernel='rbf',gamma=10,decision_function_shape='ovr') # ovr:一对多策略
