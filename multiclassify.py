@@ -240,14 +240,16 @@ def selectRFParam():
 	# "warm_start": [True, False],
 	# "oob_score": [True, False],
 	# "verbose": [True, False]}
-	grid_search = GridSearchCV(clf_RF, param_grid=param_grid, n_jobs=4)
+	grid_search = GridSearchCV(clf_RF, param_grid=param_grid, n_jobs=4,cv=5)
 	# start = time()
 	T = getData_2()  # 获取数据集
 	grid_search.fit(T[0], T[1])  # 传入训练集矩阵和训练样本类标
 	# print("GridSearchCV took %.2f seconds for %d candidate parameter settings."
 	# 	  % (time() - start, len(grid_search.cv_results_['params'])))
 	report(grid_search.cv_results_)
-
+	print("Test set score:{:.2f}".format(grid_search.score(T[2],T[3])))
+	print("Best parameters:{}".format(grid_search.best_params_))
+	print("Best score on train set:{:.2f}".format(grid_search.best_score_))
 
 # print(grid_search.cv_results_)
 
@@ -299,9 +301,7 @@ def totalAlgorithm_1():
 		DTC_rate += getRecognitionRate(clf_DTC.predict(testMatrix), testClass)
 		GBDT_rate += getRecognitionRate(clf_GBDT.predict(testMatrix), testClass)
 	# 输出各个分类器的平均识别率（K个训练集测试集，计算平均）
-	print
-	print
-	print
+
 	print('K Nearest Neighbor mean recognition rate: ', KNN_rate / float(setNums))
 	print('Linear Discriminant Analysis mean recognition rate: ', LDA_rate / float(setNums))
 	print('Support Vector Machine mean recognition rate: ', SVM_rate / float(setNums))
@@ -460,5 +460,5 @@ if __name__ == '__main__':
 	# totalAlgorithm_1()
 	print('每类前x%训练，剩余测试，各个模型的识别率')
 	totalAlgorithm_2()
-# selectRFParam()
-# print('随机森林参数调优完成！')
+	selectRFParam()
+	print('随机森林参数调优完成！')
