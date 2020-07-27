@@ -165,7 +165,7 @@ print(Y_train.shape)
 # print((Y_test == 2).sum())
 # print((Y_train == 3).sum())
 # print((Y_test == 3).sum())
-cls = GradientBoostingClassifier(n_estimators=10,random_state=10)
+cls = GradientBoostingClassifier(n_estimators=20,random_state=10)
 cls.fit(X_train, Y_train) # 训练模型
 train_score = cls.score(X_train, Y_train) #训练集得分
 test_score = cls.score(X_test, Y_test) # 测试集得分
