@@ -460,5 +460,5 @@ if __name__ == '__main__':
 	# totalAlgorithm_1()
 	print('每类前x%训练，剩余测试，各个模型的识别率')
 	totalAlgorithm_2()
-	# selectRFParam()
-	# print('随机森林参数调优完成！')
+	selectRFParam()
+	print('随机森林参数调优完成！')
