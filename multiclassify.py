@@ -197,7 +197,7 @@ def decision_tree_classifier():
 
 # GBDT
 def gradient_boosting_classifier():
-	clf = GradientBoostingClassifier(n_estimators=200)
+	clf = GradientBoostingClassifier(n_estimators=1000)
 	return clf
 
 

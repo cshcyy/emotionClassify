@@ -159,16 +159,7 @@ def get_features(list_values):
 	return crossings + statistics
 
 def getData_2():
-	# fPath = 'D:\分类算法\binary_classify_data.txt'
-	# if os.path.exists(fPath):
-	# 	data = pd.read_csv(fPath, header=None, skiprows=1, names=['class0', 'pixel0', 'pixel1', 'pixel2', 'pixel3'])
-	# 	X_train1, X_test1, y_train1, y_test1 = train_test_split(data, data['class0'], test_size=0.4, random_state=0)
-	# 	min_max_scaler = preprocessing.MinMaxScaler()  # 归一化
-	# 	X_train_minmax = min_max_scaler.fit_transform(np.array(X_train1))
-	# 	X_test_minmax = min_max_scaler.fit_transform(np.array(X_test1))
-	# 	return (X_train_minmax, np.array(y_train1), X_test_minmax, np.array(y_test1))
-	# else:
-	# 	print('No such file or directory!')
+
 	filename = 'D:/pycharm/pythonProject/ECGclassify/ECGData/data1.mat'
 	ecg_data = sio.loadmat(filename)
 	ecg_signals = ecg_data['data1'][0][0][0]
