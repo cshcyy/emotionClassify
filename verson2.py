@@ -141,20 +141,22 @@ df0 = df.loc[df['y'].isin(['0'])] #取出高兴，悲伤，愤怒，恐惧数据
 df1 = df.loc[df['y'].isin(['1'])]
 df2 = df.loc[df['y'].isin(['2'])]
 df3 = df.loc[df['y'].isin(['3'])]
-frames = [df3,df1]
+print(df0.shape,df1.shape,df2.shape,df3.shape,df.shape)
+frames = [df3,df1,df2]
 
 df_result= pd.concat(frames)
 df_train, df_test, X_train, Y_train, X_test, Y_test = get_train_test(df_result, ycol, xcols, ratio = 0.7)
 
-# cls = GradientBoostingClassifier(n_estimators=15,random_state=10)
-# cls.fit(X_train, Y_train) # 训练模型
-# train_score = cls.score(X_train, Y_train) #训练集得分
-# test_score = cls.score(X_test, Y_test) # 测试集得分
-# print("The Train Score is {:.5f}".format(train_score)) #数字格式化
-# print("The Test Score is {:.5f}".format(test_score))
-# print(Y_test)
-# Y_predict=cls.predict(X_test)
-# print(Y_predict)
+cls = GradientBoostingClassifier(n_estimators=30,random_state=10)
+
+cls.fit(X_train, Y_train) # 训练模型
+train_score = cls.score(X_train, Y_train) #训练集得分
+test_score = cls.score(X_test, Y_test) # 测试集得分
+print("The Train Score is {:.5f}".format(train_score)) #数字格式化
+print("The Test Score is {:.5f}".format(test_score))
+print(Y_test)
+Y_predict=cls.predict(X_test)
+print(Y_predict)
 # # #3.训练svm分类器
 # #
 # classifier=svm.SVC(C=2,kernel='rbf',gamma=10,decision_function_shape='ovr') # ovr:一对多策略
